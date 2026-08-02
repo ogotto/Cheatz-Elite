@@ -1,0 +1,108 @@
+=========================================
+CHEATZ ELITE DISCORD BOT
+=========================================
+
+📂 Mene projektikansioon
+
+cd C:\Users\09ott\cheatz-elite
+
+
+=========================================
+PM2-KOMENNOT
+=========================================
+
+▶ Käynnistä botti
+pm2 start "Cheatz Elite"
+
+⏹ Pysäytä botti
+pm2 stop "Cheatz Elite"
+
+🔄 Käynnistä uudelleen (kun olet muuttanut koodia)
+pm2 restart "Cheatz Elite"
+
+📋 Näytä kaikki PM2-prosessit
+pm2 list
+
+📜 Katso botin lokit
+pm2 logs "Cheatz Elite"
+
+💾 Tallenna PM2:n nykyinen tila
+pm2 save
+
+♻ Palauta tallennettu tila
+pm2 resurrect
+
+❌ Poista botti PM2:sta
+pm2 delete "Cheatz Elite"
+
+
+=========================================
+ENSIMMÄINEN KÄYNNISTYS
+=========================================
+
+cd C:\Users\09ott\cheatz-elite
+
+pm2 start index.js --name "Cheatz Elite"
+
+
+=========================================
+KOODIN MUOKKAUS
+=========================================
+
+Avaa VS Code:
+code .
+
+TAI
+
+Avaa Muistiolla:
+notepad index.js
+
+
+=========================================
+TESTIKOMENNOT DISCORDISSA
+=========================================
+
+how to be elite
+
+!say Hei kaikille!
+
+
+=========================================
+JOS BOTTI EI TOIMI
+=========================================
+
+Katso PM2-lista:
+pm2 list
+
+Katso virheet:
+pm2 logs "Cheatz Elite"
+
+Käynnistä uudelleen:
+pm2 restart "Cheatz Elite"
+
+
+=========================================
+OMA USER ID
+=========================================
+
+Discord → Settings → Advanced → Developer Mode ON
+
+Klikkaa omaa käyttäjää hiiren oikealla
+→ Copy User ID
+
+Lisää koodiin:
+
+const OWNER_ID = "OMA_USER_ID";
+
+
+=========================================
+MUUTOKSET KOODIIN
+=========================================
+
+1. Muokkaa index.js
+2. Tallenna (Ctrl + S)
+3. Suorita:
+
+pm2 restart "Cheatz Elite"
+
+Valmis!
