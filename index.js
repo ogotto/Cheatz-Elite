@@ -611,4 +611,31 @@ timeouts.set(TARGET_VC_ID, [timeout1, timeout2]);
 
 });
 
+client.on("interactionCreate", async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === "say") {
+
+        // Vain omistaja
+        if (interaction.user.id !== "1130477369115824169") {
+            return interaction.reply({
+                content: "❌ You do not have permission to use this command.",
+                ephemeral: true
+            });
+        }
+
+        const message = interaction.options.getString("message");
+
+        await interaction.reply({
+            content: "✅ Message sent.",
+            ephemeral: true
+        });
+
+        await interaction.channel.send(message);
+    }
+});
+
+
+
+
 client.login(process.env.TOKEN);
