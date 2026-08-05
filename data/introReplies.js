@@ -8,5 +8,5 @@ module.exports = [
     "🛠️ Let me help you with that...",
     "🚀 Here's what you need!",
     "✅ Found the relevant guide.",
-    "💬 I'll walk you through it."
+    "💬 I'll walk you through it!"
 ];
