@@ -31,6 +31,7 @@ let banHistory = loadBanHistory();
 
 function loadBanHistory() {
     if (!fs.existsSync(BAN_HISTORY_FILE)) {
+        fs.writeFileSync(BAN_HISTORY_FILE, "[]", "utf8");
         return [];
     }
 
