@@ -14,11 +14,12 @@ const {
     entersState
 } = require('@discordjs/voice');
 
+const path = require('path');
+const AUDIO_PATH = path.join(__dirname, "audio");
+
 const goodbyeSounds = fs.readdirSync(
     path.join(AUDIO_PATH, "goodbyeSounds")
 );
-const path = require('path');
-const AUDIO_PATH = path.join(__dirname, "audio");
 
 const TARGET_VC_ID = '1532406221565460573';
 const BANWAVE_CHANNEL_ID = "1533568957875748944";
@@ -437,8 +438,13 @@ client.on('messageCreate', async (message) => {
     if (player) {
         player.stop(true);
 
+        const randomGoodbye =
+            goodbyeSounds[Math.floor(Math.random() * goodbyeSounds.length)];
+
         player.play(
-            createAudioResource(path.join(AUDIO_PATH, "goodbye.mp3"))
+            createAudioResource(
+                path.join(AUDIO_PATH, "goodbyeSounds", randomGoodbye)
+            )
         );
 
         // Poistu VC:stä kun goodbye.mp3 on loppunut
@@ -478,8 +484,7 @@ client.on('messageCreate', async (message) => {
                 createAudioResource(path.join(AUDIO_PATH, "continue.mp3"))
             );
 
-           const intro =
-    introReplies[Math.floor(Math.random() * introReplies.length)];
+            const intro = introReplies[Math.floor(Math.random() * introReplies.length)];
 
 setTimeout(async () => {
 
