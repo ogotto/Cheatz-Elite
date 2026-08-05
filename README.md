@@ -16,10 +16,8 @@ pm2 save
 ## Updating download
 
 ```bash
-cd Cheatz-Elite
 git pull
-npm install
-pm2 restart "Cheatz Elite"
+pm2 restart "CheatzElite"
 pm2 save
 ```
 ## Updating upload
