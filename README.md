@@ -26,5 +26,6 @@ pm2 save
 
 ```bash
 git add .
+git commit -m "Update bot"
 git push
 ```
