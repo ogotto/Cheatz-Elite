@@ -13,6 +13,10 @@ const {
     VoiceConnectionStatus,
     entersState
 } = require('@discordjs/voice');
+
+const goodbyeSounds = fs.readdirSync(
+    path.join(AUDIO_PATH, "goodbyeSounds")
+);
 const path = require('path');
 const AUDIO_PATH = path.join(__dirname, "audio");
 
@@ -323,8 +327,13 @@ function resetInactivityTimer(channelId) {
 
         player.stop(true);
 
+        const randomGoodbye =
+            goodbyeSounds[Math.floor(Math.random() * goodbyeSounds.length)];
+
         player.play(
-            createAudioResource(path.join(AUDIO_PATH, "goodbye.mp3"))
+            createAudioResource(
+                path.join(AUDIO_PATH, "goodbyeSounds", randomGoodbye)
+            )
         );
 
         player.once(AudioPlayerStatus.Idle, () => {
