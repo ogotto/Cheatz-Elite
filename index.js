@@ -60,6 +60,15 @@ const client = new Client({
     ]
 });
 
+const helpedUsers = new Set();
+
+let supportMessages = 0;
+let guidesSent = 0;
+let unknownRequests = 0;
+let completedSessions = 0;
+
+const STAFF_CHANNEL_ID = "1535349488196255877";
+let staffStatsMessage = null;
 
 
 async function deleteOldBanwaveStatus() {
@@ -285,13 +294,45 @@ Our monitoring system will continue tracking the situation and automatically pos
 
 
 
+async function createStaffDashboard() {
 
+    const channel = client.channels.cache.get(STAFF_CHANNEL_ID);
+
+    if (!channel) return;
+
+    const messages = await channel.messages.fetch({ limit: 20 });
+
+    staffStatsMessage = messages.find(msg =>
+        msg.author.id === client.user.id &&
+        msg.embeds.length > 0 &&
+        msg.embeds[0].title === "📊 Cheatz Elite Support Statistics"
+    );
+
+    if (!staffStatsMessage) {
+
+        staffStatsMessage = await channel.send({
+            embeds: [
+                new EmbedBuilder()
+                    .setColor("#5865F2")
+                    .setTitle("📊 Cheatz Elite Support Statistics")
+                    .setDescription("Loading...")
+                    .setTimestamp()
+            ]
+        });
+
+        console.log("Created Support Dashboard");
+    }
+}
 
 client.once('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
 
-    await deleteOldBanwaveStatus(); // poistaa vanhan statusviestin
-    await checkBanwave();            // lähettää uuden
+    await deleteOldBanwaveStatus();
+
+await createStaffDashboard();
+await updateSupportStats();
+
+await checkBanwave();
 
     setInterval(checkBanwave, 10 * 60 * 1000);
 });
@@ -307,17 +348,35 @@ function resetInactivityTimer(channelId) {
     }
 
     // 2 min -> muistutus
-    const reminder = setTimeout(() => {
+  const reminder = setTimeout(async () => {
+    const channel = client.channels.cache.get(channelId);
 
-        const channel = client.channels.cache.get(channelId);
+    if (!channel) return;
 
-        if (channel) {
-            channel.send(
-                "👋 Are you still there? If you still need help, just send a message in chat."
-            );
-        }
+    // Tarkista, että kanavassa on vielä ihmisiä
+    const voiceChannel = client.channels.cache.get(channelId);
 
-    }, 120000);
+    if (!voiceChannel) return;
+
+    const humans = voiceChannel.members.filter(member => !member.user.bot);
+
+    if (humans.size === 0) return;
+
+    try {
+        const msg = await channel.send(
+            "👋 Are you still there? If you still need help, just send a message in chat."
+        );
+
+        // Poistetaan muistutus 30 sekunnin kuluttua
+        setTimeout(() => {
+            msg.delete().catch(() => {});
+        }, 30000);
+
+    } catch (err) {
+        console.error("Failed to send inactivity reminder:", err);
+    }
+
+}, 120000);
 
     // 5 min -> poistu
     const leave = setTimeout(() => {
@@ -386,6 +445,51 @@ const eliteKeywords = [
     "cheatzelite"
 ];
 
+async function updateSupportStats() {
+
+    const channel = client.channels.cache.get(STAFF_CHANNEL_ID);
+    if (!channel) return;
+
+    
+    if (!staffStatsMessage) return;
+    const average =
+        helpedUsers.size === 0
+            ? "0"
+            : (supportMessages / helpedUsers.size).toFixed(1);
+
+    const embed = new EmbedBuilder()
+        .setColor("#5865F2")
+        .setTitle("📊 Cheatz Elite Support Statistics")
+        .setDescription(
+`👥 **Users Helped**
+${helpedUsers.size}
+
+💬 **Support Messages**
+${supportMessages}
+
+📖 **Guides Sent**
+${guidesSent}
+
+🤔 **Unknown Requests**
+${unknownRequests}
+
+✅ **Completed Sessions**
+${completedSessions}
+
+📈 **Average Messages / User**
+${average}`
+        )
+        .setFooter({
+            text: "Updates automatically"
+        })
+        .setTimestamp();
+
+    await staffStatsMessage.edit({
+        embeds: [embed]
+    });
+
+}
+
 client.on('messageCreate', async (message) => {
     
     if (message.author.bot) return;
@@ -424,6 +528,9 @@ client.on('messageCreate', async (message) => {
 
 
    if (goodbyeKeywords.some(keyword => content.includes(keyword))) {
+
+        completedSessions++;
+        updateSupportStats();
 
     const player = players.get(TARGET_VC_ID);
     const connection = connections.get(TARGET_VC_ID);
@@ -500,6 +607,12 @@ setTimeout(async () => {
             message.reply(response.reply);
         }
 
+       helpedUsers.add(message.author.id);
+        supportMessages++;
+        guidesSent++;
+
+        updateSupportStats();
+
         return;
     }
 
@@ -515,6 +628,9 @@ if (result.length > 0) {
 
 const randomReply =
     unknownReplies[Math.floor(Math.random() * unknownReplies.length)];
+
+   unknownRequests++;
+updateSupportStats();
 
 message.reply(randomReply);
 });
