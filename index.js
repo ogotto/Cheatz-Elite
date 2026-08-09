@@ -60,12 +60,76 @@ const client = new Client({
     ]
 });
 
-const helpedUsers = new Set();
+const SUPPORT_STATS_FILE = "./supportStats.json";
 
-let supportMessages = 0;
-let guidesSent = 0;
-let unknownRequests = 0;
-let completedSessions = 0;
+function loadSupportStats() {
+
+    if (!fs.existsSync(SUPPORT_STATS_FILE)) {
+
+        const data = {
+            date: new Date().toISOString().slice(0, 10),
+            helpedUsers: [],
+            supportMessages: 0,
+            guidesSent: 0,
+            unknownRequests: 0,
+            completedSessions: 0
+        };
+
+        fs.writeFileSync(
+            SUPPORT_STATS_FILE,
+            JSON.stringify(data, null, 2)
+        );
+
+        return data;
+    }
+
+    try {
+
+        const data = JSON.parse(
+            fs.readFileSync(SUPPORT_STATS_FILE, "utf8")
+        );
+
+        const today = new Date().toISOString().slice(0, 10);
+
+        // Uusi päivä → nollataan päivän tilastot
+        if (data.date !== today) {
+
+            return {
+                date: today,
+                helpedUsers: [],
+                supportMessages: 0,
+                guidesSent: 0,
+                unknownRequests: 0,
+                completedSessions: 0
+            };
+        }
+
+        return data;
+
+    } catch (err) {
+
+        console.error("Failed to load support stats:", err);
+
+        return {
+            date: new Date().toISOString().slice(0, 10),
+            helpedUsers: [],
+            supportMessages: 0,
+            guidesSent: 0,
+            unknownRequests: 0,
+            completedSessions: 0
+        };
+    }
+}
+
+let supportStats = loadSupportStats();
+
+function saveSupportStats() {
+
+    fs.writeFileSync(
+        SUPPORT_STATS_FILE,
+        JSON.stringify(supportStats, null, 2)
+    );
+}
 
 const STAFF_CHANNEL_ID = "1535349488196255877";
 let staffStatsMessage = null;
@@ -325,14 +389,16 @@ async function createStaffDashboard() {
 }
 
 client.once('ready', async () => {
+
     console.log(`Logged in as ${client.user.tag}`);
 
     await deleteOldBanwaveStatus();
 
-await createStaffDashboard();
-await updateSupportStats();
+    await createStaffDashboard();
 
-await checkBanwave();
+    await updateSupportStats();
+
+    await checkBanwave();
 
     setInterval(checkBanwave, 10 * 60 * 1000);
 });
@@ -448,46 +514,76 @@ const eliteKeywords = [
 async function updateSupportStats() {
 
     const channel = client.channels.cache.get(STAFF_CHANNEL_ID);
-    if (!channel) return;
 
-    
-    if (!staffStatsMessage) return;
+    if (!channel) {
+        console.log("❌ Staff stats channel not found.");
+        return;
+    }
+
+    if (!staffStatsMessage) {
+        console.log("❌ Staff stats message not found.");
+        return;
+    }
+
+    const usersHelped = supportStats.helpedUsers.length;
+
     const average =
-        helpedUsers.size === 0
+        usersHelped === 0
             ? "0"
-            : (supportMessages / helpedUsers.size).toFixed(1);
+            : (
+                supportStats.supportMessages / usersHelped
+            ).toFixed(1);
 
     const embed = new EmbedBuilder()
+
         .setColor("#5865F2")
+
         .setTitle("📊 Cheatz Elite Support Statistics")
+
         .setDescription(
-`👥 **Users Helped**
-${helpedUsers.size}
+`## 👥 Users Helped
+**${usersHelped}**
 
-💬 **Support Messages**
-${supportMessages}
+## 💬 Support Activity
+**${supportStats.supportMessages}** support messages
 
-📖 **Guides Sent**
-${guidesSent}
+## 📖 Guides Sent
+**${supportStats.guidesSent}**
 
-🤔 **Unknown Requests**
-${unknownRequests}
+## 🤔 Unknown Requests
+**${supportStats.unknownRequests}**
 
-✅ **Completed Sessions**
-${completedSessions}
+## ✅ Completed Sessions
+**${supportStats.completedSessions}**
 
-📈 **Average Messages / User**
-${average}`
+## 📈 Average Messages / User
+**${average}**
+
+━━━━━━━━━━━━━━━━━━━━
+
+📅 **Date:** ${supportStats.date}
+🔄 **Status:** Automatically updated`
         )
+
         .setFooter({
-            text: "Updates automatically"
+            text: "Cheatz Elite • Staff Statistics"
         })
+
         .setTimestamp();
 
-    await staffStatsMessage.edit({
-        embeds: [embed]
-    });
+    try {
 
+        await staffStatsMessage.edit({
+            embeds: [embed]
+        });
+
+    } catch (err) {
+
+        console.error(
+            "❌ Failed to update support statistics:",
+            err
+        );
+    }
 }
 
 client.on('messageCreate', async (message) => {
@@ -529,8 +625,10 @@ client.on('messageCreate', async (message) => {
 
    if (goodbyeKeywords.some(keyword => content.includes(keyword))) {
 
-        completedSessions++;
-        updateSupportStats();
+       supportStats.completedSessions++;
+
+saveSupportStats();
+updateSupportStats();
 
     const player = players.get(TARGET_VC_ID);
     const connection = connections.get(TARGET_VC_ID);
@@ -607,11 +705,15 @@ setTimeout(async () => {
             message.reply(response.reply);
         }
 
-       helpedUsers.add(message.author.id);
-        supportMessages++;
-        guidesSent++;
+       if (!supportStats.helpedUsers.includes(message.author.id)) {
+    supportStats.helpedUsers.push(message.author.id);
+}
 
-        updateSupportStats();
+supportStats.supportMessages++;
+supportStats.guidesSent++;
+
+saveSupportStats();
+updateSupportStats();
 
         return;
     }
@@ -629,7 +731,9 @@ if (result.length > 0) {
 const randomReply =
     unknownReplies[Math.floor(Math.random() * unknownReplies.length)];
 
-   unknownRequests++;
+  supportStats.unknownRequests++;
+
+saveSupportStats();
 updateSupportStats();
 
 message.reply(randomReply);
