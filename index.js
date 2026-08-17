@@ -603,8 +603,8 @@ async function updateSupportStats() {
         });
 
         console.log(
-            `📊 Stats updated | Users: ${usersHelped} | Messages: ${supportStats.supportMessages} | Guides: ${supportStats.guidesSent} | Unknown: ${supportStats.unknownRequests} | Completed: ${supportStats.completedSessions}`
-        );
+    `📊 Stats updated | Joined: ${usersJoined} | Users Helped: ${usersHelped} | Messages: ${supportStats.supportMessages} | Guides: ${supportStats.guidesSent} | Unknown: ${supportStats.unknownRequests} | Completed: ${supportStats.completedSessions}`
+);
 
     } catch (err) {
         console.error("❌ Failed to update support statistics:", err);
