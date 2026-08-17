@@ -1,3 +1,4 @@
 node_modules/
 .env
 banHistory.json
+supportStats.json
