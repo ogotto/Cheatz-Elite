@@ -106,6 +106,11 @@ function loadSupportStats() {
             };
         }
 
+        if (!data.joinedUsers) {
+    data.joinedUsers = [];
+    saveSupportStats();
+}
+
         return data;
 
     } catch (err) {
