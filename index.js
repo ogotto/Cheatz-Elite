@@ -69,6 +69,7 @@ function loadSupportStats() {
         const data = {
             date: new Date().toISOString().slice(0, 10),
             helpedUsers: [],
+            joinedUsers: [],
             supportMessages: 0,
             guidesSent: 0,
             unknownRequests: 0,
@@ -97,6 +98,7 @@ function loadSupportStats() {
             return {
                 date: today,
                 helpedUsers: [],
+                joinedUsers: [],
                 supportMessages: 0,
                 guidesSent: 0,
                 unknownRequests: 0,
@@ -113,6 +115,7 @@ function loadSupportStats() {
         return {
             date: new Date().toISOString().slice(0, 10),
             helpedUsers: [],
+            joinedUsers: [],
             supportMessages: 0,
             guidesSent: 0,
             unknownRequests: 0,
@@ -525,6 +528,7 @@ async function updateSupportStats() {
         return;
     }
 
+    const usersJoined = supportStats.joinedUsers.length;
     const usersHelped = supportStats.helpedUsers.length;
 
     const average = usersHelped === 0
@@ -539,6 +543,9 @@ async function updateSupportStats() {
         .setDescription(
 `## 👥 Users Helped
 **${usersHelped}**
+
+## 🚪 Users Joined
+**${usersJoined}**
 
 ## 💬 Support Activity
 **${supportStats.supportMessages}** support messages
@@ -777,6 +784,14 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
     // ===== USER JOINS TARGET VC =====
     if (joined === TARGET_VC_ID) {
+        if (!newState.member.user.bot) {
+    if (!supportStats.joinedUsers.includes(newState.member.id)) {
+        supportStats.joinedUsers.push(newState.member.id);
+
+        saveSupportStats();
+        updateSupportStats();
+    }
+}
 
         console.log('Someone joined target VC');
 
