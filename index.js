@@ -368,19 +368,31 @@ Our monitoring system will continue tracking the situation and automatically pos
 
 async function createStaffDashboard() {
 
+    console.log("🔍 Creating staff dashboard...");
+
     const channel = client.channels.cache.get(STAFF_CHANNEL_ID);
 
-    if (!channel) return;
+    if (!channel) {
+        console.log("❌ Staff stats channel not found:", STAFF_CHANNEL_ID);
+        return;
+    }
 
-    const messages = await channel.messages.fetch({ limit: 20 });
+    console.log("✅ Staff stats channel found:", channel.name);
 
-    staffStatsMessage = messages.find(msg =>
-        msg.author.id === client.user.id &&
-        msg.embeds.length > 0 &&
-        msg.embeds[0].title === "📊 Cheatz Elite Support Statistics"
-    );
+    try {
 
-    if (!staffStatsMessage) {
+        const messages = await channel.messages.fetch({ limit: 20 });
+
+        staffStatsMessage = messages.find(msg =>
+            msg.author.id === client.user.id &&
+            msg.embeds.length > 0 &&
+            msg.embeds[0].title === "📊 Cheatz Elite Support Statistics"
+        );
+
+        if (staffStatsMessage) {
+            console.log("✅ Existing stats embed found.");
+            return;
+        }
 
         staffStatsMessage = await channel.send({
             embeds: [
@@ -392,7 +404,12 @@ async function createStaffDashboard() {
             ]
         });
 
-        console.log("Created Support Dashboard");
+        console.log("✅ Created Support Dashboard.");
+
+    } catch (err) {
+
+        console.error("❌ Failed to create Support Dashboard:", err);
+
     }
 }
 
@@ -789,14 +806,22 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
     // ===== USER JOINS TARGET VC =====
     if (joined === TARGET_VC_ID) {
-        if (!newState.member.user.bot) {
-    if (!supportStats.joinedUsers.includes(newState.member.id)) {
-        supportStats.joinedUsers.push(newState.member.id);
 
-        saveSupportStats();
-        updateSupportStats();
+    if (!newState.member.user.bot) {
+
+        if (!supportStats.joinedUsers.includes(newState.member.id)) {
+
+            supportStats.joinedUsers.push(newState.member.id);
+
+            saveSupportStats();
+
+            console.log(
+                `🚪 User joined | Total joined: ${supportStats.joinedUsers.length}`
+            );
+
+            await updateSupportStats();
+        }
     }
-}
 
         console.log('Someone joined target VC');
 
