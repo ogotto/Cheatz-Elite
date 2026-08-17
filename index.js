@@ -582,6 +582,24 @@ async function updateSupportStats() {
     }
 }
 
+const greetings = [
+    "hello",
+    "hi",
+    "hey",
+    "hello there",
+    "good morning",
+    "good evening",
+    "yo"
+];
+
+const greetingReplies = [
+    "Hello!",
+    "Hey! How can I help?",
+    "Hi there!",
+    "Hello, welcome!",
+    "Hey!"
+];
+
 client.on('messageCreate', async (message) => {
     
     if (message.author.bot) return;
@@ -594,6 +612,14 @@ client.on('messageCreate', async (message) => {
 );
     const content = message.content.toLowerCase();
     resetInactivityTimer(TARGET_VC_ID);
+    if (greetings.includes(content)) {
+    const reply =
+        greetingReplies[
+            Math.floor(Math.random() * greetingReplies.length)
+        ];
+
+    return message.reply(reply);
+}
 
     if (eliteKeywords.some(word => content.includes(word))) {
 
