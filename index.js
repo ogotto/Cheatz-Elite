@@ -929,5 +929,5 @@ client.on("interactionCreate", async (interaction) => {
 
 
 
-
+console.log("🔥🔥🔥 NEW CODE IS RUNNING - JOINED USERS VERSION 🔥🔥🔥");
 client.login(process.env.TOKEN);
