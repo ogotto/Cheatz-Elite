@@ -667,6 +667,7 @@ updateSupportStats();
     for (const response of responses) {
 
      if (!response.triggers.includes(content)) continue;
+     console.log("✅ RESPONSE MATCH:", content);
 
         const player = players.get(TARGET_VC_ID);
 
@@ -709,6 +710,8 @@ setTimeout(async () => {
 
 supportStats.supportMessages++;
 supportStats.guidesSent++;
+
+console.log("📊 Updating stats...");
 
 saveSupportStats();
 updateSupportStats();
