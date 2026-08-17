@@ -516,7 +516,7 @@ async function updateSupportStats() {
     const channel = client.channels.cache.get(STAFF_CHANNEL_ID);
 
     if (!channel) {
-        console.log("❌ Staff stats channel not found.");
+        console.log("❌ Staff stats channel not found:", STAFF_CHANNEL_ID);
         return;
     }
 
@@ -527,19 +527,15 @@ async function updateSupportStats() {
 
     const usersHelped = supportStats.helpedUsers.length;
 
-    const average =
-        usersHelped === 0
-            ? "0"
-            : (
-                supportStats.supportMessages / usersHelped
-            ).toFixed(1);
+    const average = usersHelped === 0
+        ? "0"
+        : (supportStats.supportMessages / usersHelped).toFixed(1);
 
     const embed = new EmbedBuilder()
-
-        .setColor("#5865F2")
-
+      
+    .setColor("#5865F2")
         .setTitle("📊 Cheatz Elite Support Statistics")
-
+      
         .setDescription(
 `## 👥 Users Helped
 **${usersHelped}**
@@ -577,12 +573,12 @@ async function updateSupportStats() {
             embeds: [embed]
         });
 
-    } catch (err) {
-
-        console.error(
-            "❌ Failed to update support statistics:",
-            err
+        console.log(
+            `📊 Stats updated | Users: ${usersHelped} | Messages: ${supportStats.supportMessages} | Guides: ${supportStats.guidesSent} | Unknown: ${supportStats.unknownRequests} | Completed: ${supportStats.completedSessions}`
         );
+
+    } catch (err) {
+        console.error("❌ Failed to update support statistics:", err);
     }
 }
 
@@ -593,7 +589,9 @@ client.on('messageCreate', async (message) => {
 
     // Vastaa vain Support VC:n chatissa
     if (message.channel.id !== TARGET_VC_ID) return;
-
+    console.log(
+    `📩 Support message from ${message.author.tag}: ${message.content}`
+);
     const content = message.content.toLowerCase();
     resetInactivityTimer(TARGET_VC_ID);
 
